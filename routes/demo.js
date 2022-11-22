@@ -1,4 +1,5 @@
 const express = require('express');
+const bcrypt = require('bcryptjs'); // require bcryptjs - a hashing password package
 
 const db = require('../data/database');
 
@@ -22,9 +23,13 @@ router.post('/signup', async function (req, res) {
   const enteredConfirmEmail = userData['confirm-email'];
   const enteredPassword = userData.password;
 
+  const hashedPassword = await bcrypt.hash(enteredPassword, 12);
+  // first parameter is which should be crypted and
+  // the second is the level of strength of the crypt
+
   const user = {
     email: enteredEmail,
-    password: enteredPassword
+    password: hashedPassword
   }
 
   await db.getDb().collection('users').insertOne(user);
