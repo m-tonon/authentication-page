@@ -10,7 +10,21 @@ router.get('/', function (req, res) {
 });
 
 router.get('/signup', function (req, res) {
-  res.render('signup');
+  let sessionInputData = req.session.inputData; // same key from router.post for signup
+
+  if (!sessionInputData) { 
+    sessionInputData = {
+      hasError: false,
+      email: '',
+      confirmEmail: '',
+      password: ''
+    };
+  }
+
+// This sent this inputdata to the template and then if get any wrong data apply the user
+// just need to correct and no rewrite everything again => now can use on the template signup.ejs
+
+  res.render('signup', { inputData: sessionInputData });
 });
 
 router.get('/login', function (req, res) {
@@ -23,8 +37,7 @@ router.post('/signup', async function (req, res) {
   const enteredConfirmEmail = userData['confirm-email'];
   const enteredPassword = userData.password;
 
-  if (
-    // validating rules
+  if ( // validating rules
     !enteredEmail ||
     !enteredConfirmEmail ||
     !enteredPassword ||
@@ -32,8 +45,17 @@ router.post('/signup', async function (req, res) {
     enteredEmail !== enteredConfirmEmail ||
     !enteredEmail.includes('@')
   ) {
-    console.log('Incorrect data!');
-    return res.redirect('/signup');
+    req.session.inputData = {// this will be stored in a session
+      hasError: true,
+      message: 'Invalid input - please check your data.',
+      email: enteredEmail,
+      confirmEmail: enteredConfirmEmail,
+      password: enteredPassword,
+    };
+
+    req.session.save(function () { // redirect after the session is saved
+      return res.redirect('/signup');
+    });
   }
 
   const existingUser = await db
@@ -86,21 +108,21 @@ router.post('/login', async function (req, res) {
   }
 
   req.session.user = { id: existingUser._id, email: existingUser.email }; // save in user object
-  req.session.isAuthenticated = true; 
-  req.session.save(function() { // force the data to be save on db
+  req.session.isAuthenticated = true;
+  req.session.save(function () {// force the data to be save on db
     res.redirect('/admin');     // and just then the user will be redirected
-  }); 
+  });
 });
 
 router.get('/admin', function (req, res) {
-  if (!req.session.isAuthenticated){ // if is falsy - no data on session
+  if (!req.session.isAuthenticated) { // if is falsy - no data on session
     return res.status(401).render('401');
   }
   res.render('admin');
 });
 
 router.post('/logout', function (req, res) {
-  req.session.user = null; 
+  req.session.user = null;
   req.session.isAuthenticated = false;
   res.redirect('/');
 });
