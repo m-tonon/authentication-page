@@ -13,7 +13,7 @@ const MongoDBStore = mongodbStore(session); // => conecting the two packages
 const app = express();
 
 const sessionStore = new MongoDBStore({ // => the setting needed to connect to the db
-  uri: '127.0.0.1:27017', // path for the database
+  uri: 'mongodb://127.0.0.1:27017', // path for the database
   databaseName: 'auth-demo', // the same name used on database.js
   collection: 'sessions'
 })
