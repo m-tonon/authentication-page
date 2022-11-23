@@ -28,7 +28,10 @@ app.use(session({ // settings of the session
   secret: 'super-secret', // key to secure the session
   resave: false, // a session is only updated in db if the data is really changed
   saveUninitialized: false, // a session is stored once there is a data
-  store: sessionStore//controls where the session data should be stored
+  store: sessionStore,//controls where the session data should be stored
+  // cookie: {
+  //   maxAge: 30 * 24 * 60 * 60 * 1000 // how long the cookie will last in miliseconds
+  // }
 }));
 
 app.use(demoRoutes);

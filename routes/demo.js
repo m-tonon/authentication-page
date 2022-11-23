@@ -93,8 +93,9 @@ router.post('/login', async function (req, res) {
 });
 
 router.get('/admin', function (req, res) {
-  //Check the user 'ticket'
-
+  if (!req.session.isAuthenticated){ // if is falsy - no data on session
+    return res.status(401).render('401');
+  }
   res.render('admin');
 });
 
