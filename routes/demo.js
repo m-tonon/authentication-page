@@ -23,14 +23,37 @@ router.post('/signup', async function (req, res) {
   const enteredConfirmEmail = userData['confirm-email'];
   const enteredPassword = userData.password;
 
+  if (
+    // validating rules
+    !enteredEmail ||
+    !enteredConfirmEmail ||
+    !enteredPassword ||
+    enteredPassword.trim() < 6 ||
+    enteredEmail !== enteredConfirmEmail ||
+    !enteredEmail.includes('@')
+  ) {
+    console.log('Incorrect data!');
+    return res.redirect('/signup');
+  }
+
+  const existingUser = await db
+    .getDb()
+    .collection('users')
+    .findOne({ email: enteredEmail });
+
+  if (existingUser) {
+    console.log('User exists already');
+    return res.redirect('/signup');
+  }
+
   const hashedPassword = await bcrypt.hash(enteredPassword, 12);
   // first parameter is which should be crypted and
   // the second is the level of strength of the crypt
 
   const user = {
     email: enteredEmail,
-    password: hashedPassword
-  }
+    password: hashedPassword,
+  };
 
   await db.getDb().collection('users').insertOne(user);
 
@@ -48,14 +71,15 @@ router.post('/login', async function (req, res) {
     .findOne({ email: enteredEmail });
 
   if (!existingUser) {
-    console.log('Could not log in!')
+    console.log('Could not log in!');
     return res.redirect('/login');
   }
 
   const passwordsAreEqual = await bcrypt.compare(
-    enteredPassword, 
-    existingUser.password);
-  
+    enteredPassword,
+    existingUser.password
+  );
+
   if (!passwordsAreEqual) {
     console.log('Could not log in - passwords are not equal!');
     return res.redirect('/login');
