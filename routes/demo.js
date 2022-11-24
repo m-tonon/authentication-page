@@ -45,7 +45,7 @@ router.post('/signup', async function (req, res) {
     enteredEmail !== enteredConfirmEmail ||
     !enteredEmail.includes('@')
   ) {
-    req.session.inputData = {// this will be stored in a session
+    req.session.inputData = {// this will be stored in a session so no need rewrite when get error
       hasError: true,
       message: 'Invalid input - please check your data.',
       email: enteredEmail,
@@ -53,9 +53,10 @@ router.post('/signup', async function (req, res) {
       password: enteredPassword,
     };
 
-    req.session.save(function () { // redirect after the session is saved
-      return res.redirect('/signup');
+    req.session.save(function () { // redirect after the session above is saved
+      return res.redirect('/signup'); // return to the signup page
     });
+    return; // stops the code - this ensure that the next codes doesnt execute
   }
 
   const existingUser = await db
