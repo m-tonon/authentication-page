@@ -155,14 +155,11 @@ router.post('/login', async function (req, res) {
 });
 
 router.get('/admin', async function (req, res) {
-  if (!req.session.isAuthenticated) { // if is falsy - no data on session
+  if (!res.locals.isAuth) { // if is falsy - no data on session
     return res.status(401).render('401');
   }
 
-  // looking for id of the session
-  const user = await db.getDb().collection('users').findOne({_id: req.session.user.id}) 
-
-  if(!user || !user.isAdmin) { // checking if the user has admin authorization
+  if(!res.locals.isAdmin) { // checking if the user has admin authorization
     return res.status(403).render('403');
   }
 
@@ -170,7 +167,7 @@ router.get('/admin', async function (req, res) {
 });
 
 router.get('/profile', function (req, res) {
-  if (!req.session.isAuthenticated) { 
+  if (!res.locals.isAuth) { 
     return res.status(401).render('401');
   }
   res.render('profile');
