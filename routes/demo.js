@@ -114,15 +114,30 @@ router.post('/login', async function (req, res) {
   req.session.user = { id: existingUser._id, email: existingUser.email }; // save in user object
   req.session.isAuthenticated = true;
   req.session.save(function () {// force the data to be save on db
-    res.redirect('/admin');     // and just then the user will be redirected
+    res.redirect('/profile');   // and just then the user will be redirected
   });
 });
 
-router.get('/admin', function (req, res) {
+router.get('/admin', async function (req, res) {
   if (!req.session.isAuthenticated) { // if is falsy - no data on session
     return res.status(401).render('401');
   }
+
+  // looking for id of the session
+  const user = await db.getDb().collection('users').findOne({_id: req.session.user.id}) 
+
+  if(!user || !user.isAdmin) { // checking if the user has admin authorization
+    return res.status(403).render('403');
+  }
+
   res.render('admin');
+});
+
+router.get('/profile', function (req, res) {
+  if (!req.session.isAuthenticated) { 
+    return res.status(401).render('401');
+  }
+  res.render('profile');
 });
 
 router.post('/logout', function (req, res) { // 'deleting' the session
