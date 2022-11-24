@@ -21,7 +21,10 @@ router.get('/signup', function (req, res) {
     };
   }
 
-// This sent this inputdata to the template and then if get any wrong data apply the user
+  req.session.inputData = null; // this technique is called 'flashing'
+  // this clean the forms to the next request after redirect
+
+// This code above sent this inputdata to the template and then if get any wrong data apply the user
 // just need to correct and no rewrite everything again => now can use on the template signup.ejs
 
   res.render('signup', { inputData: sessionInputData });
@@ -122,7 +125,7 @@ router.get('/admin', function (req, res) {
   res.render('admin');
 });
 
-router.post('/logout', function (req, res) {
+router.post('/logout', function (req, res) { // 'deleting' the session
   req.session.user = null;
   req.session.isAuthenticated = false;
   res.redirect('/');
